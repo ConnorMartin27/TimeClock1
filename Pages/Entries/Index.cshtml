@@ -1,0 +1,15 @@
+﻿@page
+@model TimeClock.Pages.Entries.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+
+<p>Amount of time worked: @Model.TotalDurationBetweenType1And2.ToString(@"hh\:mm\:ss")</p>
+</table>
