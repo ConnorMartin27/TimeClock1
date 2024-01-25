@@ -1,25 +1,34 @@
 ﻿@page
 @model TimeClock.Pages.Entries.CreateModel
-
-@{
-    ViewData["Title"] = "Create";
-}
-
+@{ViewData["Title"] = "Create";}
 <h1>Create</h1>
 
 
 <h2>Add Timestamp</h2>
 
-<form method="post">
-    <button type="submit">Add Timestamp</button>
+<form method="post" id="timestampForm">
+    <button type="submit" id="submitButton">
+        @if (HttpMethods.IsPost(Model.Request.Method))
+        {
+            @(Model.newlyAddedEntry.type == 1 ? "Clock Out" : "Clock In")
+        } 
+        else {
+            <h>Clock</h>
+        }
+    </button>
 </form>
 
-<p>Timestamp added: @Model.Entry</p>
+@if (HttpMethods.IsPost(Model.Request.Method))
+{
 
+    <p>Timestamp: @Model.newlyAddedEntry.Timestamp</p>
+    <p>Type: @(Model.newlyAddedEntry.type == 1 ? "In" : "Out")</p>
+    <p>User: @(Model.newlyAddedEntry.UserId)</p>
+}
 <div>
     <a asp-page="Index">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

@@ -12,28 +12,37 @@ using TimeClock.Models;
 
 namespace TimeClock.Pages.Entries
 {
+   
     public class CreateModel : PageModel
     {
         private readonly TimeClock.Data.TimeClockContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+
         
 
+
+        public int lastType;
         public CreateModel(TimeClock.Data.TimeClockContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
+        
         public IActionResult OnGet()
         {
-
-        ViewData["UserId"] = new SelectList(_context.Set<IdentityUser>(), "Id", "Id");
+            
+            
+            ViewData["UserId"] = new SelectList(_context.Set<IdentityUser>(), "Id", "Id");
+            var entries = _context.Entry.ToList();
+            lastType = entries.Any() ? entries.OrderByDescending(e => e.Timestamp).First().type : 0;
             return Page();
         }
 
         [BindProperty]
         public Entry Entry { get; set; } = default!;
 
+        public Entry newlyAddedEntry { get; set; }
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
@@ -44,12 +53,14 @@ namespace TimeClock.Pages.Entries
             var entries = _context.Entry.ToList();
 
             int lastType = entries.Any() ? entries.OrderByDescending(e => e.Timestamp).First().type : 0;
+            Console.WriteLine($"LastType Before: {lastType}");
             int newType = (lastType == 1) ? 2 : 1;
+            Console.WriteLine($"LastType After: {lastType}, NewType: {newType}");
 
             var entry = new Entry
             {
                 Timestamp = DateTime.Now,
-                UserId = "0f3e2655-c4b0-48b5-9616-f7df05b992b0",
+                UserId = user.Id,
                 type = newType
             };
             _context.Entry.Add(entry);
@@ -58,12 +69,14 @@ namespace TimeClock.Pages.Entries
      
             if (!ModelState.IsValid)
             {
+                newlyAddedEntry = _context.Entry.OrderByDescending(e => e.Timestamp).First();
                 return Page();
             }
 
             _context.Entry.Add(Entry);
             await _context.SaveChangesAsync();
 
+            
             return RedirectToPage("./Index");
         }
     }
